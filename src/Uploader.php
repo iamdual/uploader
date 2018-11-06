@@ -406,6 +406,7 @@ class Uploader
 
     /**
      * Upload the file.
+     * @param $upload_function string (optional)
      * @return boolean
      */
     public function upload($upload_function = "move_uploaded_file")
@@ -474,7 +475,8 @@ class Uploader
      * @param array $file_array
      * @return array
      */
-    public static function multiple_file_array($file_array) {
+    public static function multiple_file_array($file_array)
+    {
         $files = array();
         foreach ($file_array as $files_key => $files_array) {
             foreach ($files_array as $i => $val) {
