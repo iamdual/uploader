@@ -12,7 +12,7 @@ if (isset($_POST["data"])) {
     $upload->path("upload/files");
     $upload->name("unicorn");
 
-    // While uploading file from base64 encoded text, you need to change upload function
+    // While uploading file from base64 encoded file, you need to change upload function
     // to "copy", otherwise file can not be uploaded!
 
     if (! $upload->upload("copy")) {
