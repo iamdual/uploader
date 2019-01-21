@@ -9,9 +9,8 @@ if (isset($_POST["data"])) {
     $upload->allowed_extensions(array("png", "jpg", "jpeg", "gif"));
     $upload->allowed_types(array("image/png", "image/jpeg"));
     $upload->max_size(5); // in MB
-    $upload->min_size(0); // in MB
     $upload->path("upload/files");
-    $upload->encrypt_name();
+    $upload->name("unicorn");
 
     // While uploading file from base64 encoded text, you need to change upload function
     // to "copy", otherwise file can not be uploaded!
