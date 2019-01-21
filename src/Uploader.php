@@ -488,18 +488,28 @@ class Uploader
 
     /**
      * Create file array from base64 encoded file
-     * @param string $data
+     * @param string $base64
      * @return array
      */
-    public static function from_base64($data)
+    public static function from_base64($base64)
     {
-        $encoded = explode(";base64,", $data, 2);
+        $encoded = explode(";base64,", $base64, 2);
         if (isset($encoded[1])) {
-            $data = $encoded[1];
+            $base64 = $encoded[1];
         }
 
+        return self::create_temp_file(base64_decode($base64));
+    }
+
+    /**
+     * Create a temporary file from source
+     * @param string $source
+     * @return array
+     */
+    public static function create_temp_file($source)
+    {
         $temp = tmpfile();
-        fwrite($temp, base64_decode($data));
+        fwrite($temp, $source);
         $meta = stream_get_meta_data($temp);
         $mime = mime_content_type($meta["uri"]);
         $split = explode("/", $mime);
