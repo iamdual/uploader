@@ -502,6 +502,15 @@ class Uploader
     }
 
     /**
+     * Create file array from raw input
+     * @return array
+     */
+    public static function from_raw_input()
+    {
+        return self::create_temp_file(file_get_contents("php://input"));
+    }
+
+    /**
      * Create a temporary file from source
      * @param string $source
      * @return array
