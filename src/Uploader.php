@@ -315,7 +315,7 @@ class Uploader
         }
 
         if ($this->encrypt_name) {
-            $this->name = sha1($this->name . "-" . rand(10000, 99999) . "-" . time());
+            $this->name = self::hashed($this->name);
             $this->encrypt_name = false;
         }
 
@@ -418,8 +418,8 @@ class Uploader
             $filepath = $this->get_path($this->get_name());
             if ($this->override === false && $this->encrypt_name === false && file_exists($filepath)) {
                 $fileinfo = pathinfo($filepath);
-                $filename = $fileinfo['filename'];
-                $fileextn = $fileinfo['extension'];
+                $filename = $fileinfo["filename"];
+                $fileextn = $fileinfo["extension"];
                 $number = 2;
                 do {
                     $filepath = $this->get_path($filename . (($number) ? "_{$number}" : "") . "." . $fileextn);
@@ -484,5 +484,47 @@ class Uploader
             }
         }
         return $files;
+    }
+
+    /**
+     * Create file array from base64 encoded file
+     * @param string $data
+     * @return array
+     */
+    public static function from_base64($data)
+    {
+        $encoded = explode(";base64,", $data, 2);
+        if (isset($encoded[1])) {
+            $data = $encoded[1];
+        }
+
+        $temp = tmpfile();
+        fwrite($temp, base64_decode($data));
+        $meta = stream_get_meta_data($temp);
+        $mime = mime_content_type($meta["uri"]);
+        $split = explode("/", $mime);
+        $ext = array_pop($split);
+
+        register_shutdown_function(function() use($temp) {
+            fclose($temp);
+        });
+
+        return array(
+            "name" => self::hashed($meta["uri"]) . "." . $ext,
+            "size" => filesize($meta["uri"]),
+            "type" => $mime,
+            "tmp_name" => $meta["uri"],
+            "error" => 0
+        );
+    }
+
+    /**
+     * Hashed text
+     * @param string $filename
+     * @return string
+     */
+    public static function hashed($filename)
+    {
+        return sha1($filename . "-" . rand(10000, 99999) . "-" . time());
     }
 }
