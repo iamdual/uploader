@@ -31,4 +31,18 @@ final class UploadTest extends TestCase
             @unlink($file);
         }
     }
+
+    public function testFromBase64()
+    {
+        $base64_data = base64_encode(file_get_contents(__DIR__ . "/assets/foo.jpg"));
+        $upload = new \iamdual\Uploader(\iamdual\Uploader::from_base64($base64_data));
+        $upload->allowed_extensions(array("jpg", "jpeg"));
+        $upload->allowed_types(array("image/jpeg"));
+        $upload->max_image_dimensions(210, 60);
+        $upload->min_image_dimensions(210, 60);
+        $upload->name("hello.jpg", false);
+        $this->assertEquals($upload->upload("copy"), true);
+        $this->assertEquals($upload->get_name(), "hello.jpg");
+        @unlink($upload->get_path("hello.jpg"));
+    }
 }
