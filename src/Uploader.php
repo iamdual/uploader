@@ -104,6 +104,11 @@ class Uploader
     public $name = null;
 
     /**
+     * @var boolean
+     */
+    public $auto_extension = true;
+
+    /**
      * @var array
      */
     public $max_image_dimensions = null;
@@ -252,11 +257,13 @@ class Uploader
     /**
      * Rename the uploaded file (example: foo)
      * @param string $name
+     * @param boolean $auto_extension
      * @return $this
      */
-    public function name($name)
+    public function name($name, $auto_extension = true)
     {
         $this->name = $name;
+        $this->auto_extension = $auto_extension;
         return $this;
     }
 
@@ -311,15 +318,21 @@ class Uploader
     public function get_name()
     {
         if ($this->name === null) {
-            $this->name = pathinfo($this->file["name"], PATHINFO_FILENAME);
+            $this->name = $this->file["name"];
+            $this->auto_extension = false;
         }
 
         if ($this->encrypt_name) {
-            $this->name = self::hashed($this->name);
+            $this->name = self::hashed($this->name) . $this->get_ext($this->file["name"], true);
+            $this->auto_extension = false;
             $this->encrypt_name = false;
         }
 
-        return $this->name . "." . $this->get_ext($this->file["name"]);
+        if ($this->auto_extension) {
+            return pathinfo($this->name, PATHINFO_FILENAME) . $this->get_ext($this->file["name"], true);
+        } else {
+            return $this->name;
+        }
     }
 
     /**
@@ -396,7 +409,7 @@ class Uploader
 
     /**
      * Get error if exists
-     * @param $with_message boolean (optional)
+     * @param boolean $with_message (optional)
      * @return string
      */
     public function get_error($with_message = true)
@@ -406,7 +419,7 @@ class Uploader
 
     /**
      * Upload the file.
-     * @param $upload_function string (optional)
+     * @param string $upload_function (optional)
      * @return boolean
      */
     public function upload($upload_function = "move_uploaded_file")
@@ -419,13 +432,13 @@ class Uploader
             if ($this->override === false && $this->encrypt_name === false && file_exists($filepath)) {
                 $fileinfo = pathinfo($filepath);
                 $filename = $fileinfo["filename"];
-                $fileextn = $fileinfo["extension"];
+                $fileextn = isset($fileinfo["extension"]) ? "." . $fileinfo["extension"] : "";
                 $number = 2;
                 do {
-                    $filepath = $this->get_path($filename . (($number) ? "_{$number}" : "") . "." . $fileextn);
+                    $filepath = $this->get_path($filename . (($number) ? "_{$number}" : "") . $fileextn);
                     $number++;
                 } while (file_exists($filepath));
-                $this->name = pathinfo($filepath, PATHINFO_FILENAME);
+                $this->name = pathinfo($filepath, PATHINFO_BASENAME);
             }
             @$upload_function($this->file["tmp_name"], $filepath);
             return true;
@@ -436,11 +449,12 @@ class Uploader
 
     /**
      * Get the full path
+     * @param string $filename
      * @return string
      */
-    public function get_path($filename = null)
+    public function get_path($filename = "")
     {
-        $path = null;
+        $path = "";
         if ($this->path !== null) {
             $path = rtrim($this->path, "/") . "/";
         }
@@ -453,11 +467,16 @@ class Uploader
     /**
      * Get extension by filename
      * @param string $filename
+     * @param boolean $with_dot
      * @return string
      */
-    public static function get_ext($filename)
+    public static function get_ext($filename, $with_dot = false)
     {
-        return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if ($with_dot && $extension) {
+            $extension = "." . $extension;
+        }
+        return $extension;
     }
 
     /**
