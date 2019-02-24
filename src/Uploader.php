@@ -511,7 +511,7 @@ class Uploader
      * @param array $mime_map (optional)
      * @return array
      */
-    public static function from_base64($base64, $mime_map = null)
+    public static function from_base64($base64, $mime_map = [])
     {
         $encoded = explode(";base64,", $base64, 2);
         if (isset($encoded[1])) {
@@ -526,7 +526,7 @@ class Uploader
      * @return array
      * @param array $mime_map (optional)
      */
-    public static function from_raw_input($mime_map = null)
+    public static function from_raw_input($mime_map = [])
     {
         return self::create_temp_file(file_get_contents("php://input"), $mime_map);
     }
@@ -537,17 +537,17 @@ class Uploader
      * @param array $mime_map (optional)
      * @return array
      */
-    public static function create_temp_file($source, $mime_map = null)
+    public static function create_temp_file($source, $mime_map = [])
     {
         $temp = tmpfile();
         fwrite($temp, $source);
         $meta = stream_get_meta_data($temp);
         $mime = mime_content_type($meta["uri"]);
-        $split = explode("/", $mime);
 
-        if ($mime_map && isset($mime_map[$mime])) {
+        if (isset($mime_map[$mime])) {
             $ext = $mime_map[$mime];
         } else {
+            $split = explode("/", $mime);
             $ext = array_pop($split);
         }
 
