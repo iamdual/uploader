@@ -419,10 +419,10 @@ class Uploader
 
     /**
      * Upload the file.
-     * @param string $upload_function (optional)
+     * @param boolean $copy_file (optional)
      * @return boolean
      */
-    public function upload($upload_function = "move_uploaded_file")
+    public function upload($copy_file = false)
     {
         if ($this->check()) {
             if (!file_exists($this->get_path())) {
@@ -440,7 +440,8 @@ class Uploader
                 } while (file_exists($filepath));
                 $this->name = pathinfo($filepath, PATHINFO_BASENAME);
             }
-            @$upload_function($this->file["tmp_name"], $filepath);
+            $upload_function = $copy_file ? "copy" : "move_uploaded_file";
+            $upload_function($this->file["tmp_name"], $filepath);
             return true;
         } else {
             return false;
