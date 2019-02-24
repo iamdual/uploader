@@ -508,40 +508,48 @@ class Uploader
     /**
      * Create file array from base64 encoded file
      * @param string $base64
+     * @param array $mime_map (optional)
      * @return array
      */
-    public static function from_base64($base64)
+    public static function from_base64($base64, $mime_map = null)
     {
         $encoded = explode(";base64,", $base64, 2);
         if (isset($encoded[1])) {
             $base64 = $encoded[1];
         }
 
-        return self::create_temp_file(base64_decode($base64));
+        return self::create_temp_file(base64_decode($base64), $mime_map);
     }
 
     /**
      * Create file array from raw input
      * @return array
+     * @param array $mime_map (optional)
      */
-    public static function from_raw_input()
+    public static function from_raw_input($mime_map = null)
     {
-        return self::create_temp_file(file_get_contents("php://input"));
+        return self::create_temp_file(file_get_contents("php://input"), $mime_map);
     }
 
     /**
      * Create a temporary file from source
      * @param string $source
+     * @param array $mime_map (optional)
      * @return array
      */
-    public static function create_temp_file($source)
+    public static function create_temp_file($source, $mime_map = null)
     {
         $temp = tmpfile();
         fwrite($temp, $source);
         $meta = stream_get_meta_data($temp);
         $mime = mime_content_type($meta["uri"]);
         $split = explode("/", $mime);
-        $ext = array_pop($split);
+
+        if ($mime_map && isset($mime_map[$mime])) {
+            $ext = $mime_map[$mime];
+        } else {
+            $ext = array_pop($split);
+        }
 
         register_shutdown_function(function() use($temp) {
             fclose($temp);
