@@ -345,6 +345,23 @@ class Uploader
     }
 
     /**
+     * Get the data URL of the temporary file
+     * @return string
+     */
+    public function get_data_url()
+    {
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+
+        if (isset($this->file["tmp_name"])) {
+            $mime =  mime_content_type($this->file["tmp_name"]);
+            $source = file_get_contents($this->file["tmp_name"]);
+            $encoded = base64_encode($source);
+            return 'data:' . $mime . ';base64,' . $encoded;
+        }
+        return null;
+    }
+
+    /**
      * Check the file can be uploaded
      * @return boolean
      */
