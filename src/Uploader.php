@@ -19,13 +19,13 @@ namespace iamdual;
 
 class Uploader
 {
-    const ERR_EMPTY_FILE    = 1;
-    const ERR_INVALID_EXT   = 2;
-    const ERR_INVALID_TYPE  = 3;
-    const ERR_LONG_SIZE     = 4;
-    const ERR_SMALL_SIZE    = 5;
+    const ERR_EMPTY_FILE = 1;
+    const ERR_INVALID_EXT = 2;
+    const ERR_INVALID_TYPE = 3;
+    const ERR_LONG_SIZE = 4;
+    const ERR_SMALL_SIZE = 5;
     const ERR_UNKNOWN_ERROR = 6;
-    const ERR_NOT_AN_IMAGE  = 7;
+    const ERR_NOT_AN_IMAGE = 7;
     const ERR_MAX_DIMENSION = 8;
     const ERR_MIN_DIMENSION = 9;
 
@@ -46,13 +46,13 @@ class Uploader
      * @var array
      */
     private $error_messages = array(
-        self::ERR_EMPTY_FILE    => "No file selected.",
-        self::ERR_INVALID_EXT   => "Invalid file extension.",
-        self::ERR_INVALID_TYPE  => "Invalid file mime type.",
-        self::ERR_LONG_SIZE     => "File size is too large.",
-        self::ERR_SMALL_SIZE    => "File size is too small.",
+        self::ERR_EMPTY_FILE => "No file selected.",
+        self::ERR_INVALID_EXT => "Invalid file extension.",
+        self::ERR_INVALID_TYPE => "Invalid file mime type.",
+        self::ERR_LONG_SIZE => "File size is too large.",
+        self::ERR_SMALL_SIZE => "File size is too small.",
         self::ERR_UNKNOWN_ERROR => "Unknown error occurred.",
-        self::ERR_NOT_AN_IMAGE  => "The selected file must be an image.",
+        self::ERR_NOT_AN_IMAGE => "The selected file must be an image.",
         self::ERR_MAX_DIMENSION => "The dimensions of the file is too large.",
         self::ERR_MIN_DIMENSION => "The dimensions of the file is too small."
     );
@@ -323,16 +323,25 @@ class Uploader
         }
 
         if ($this->encrypt_name) {
-            $this->name = self::hashed($this->name) . $this->get_ext($this->file["name"], true);
+            $this->name = self::hashed($this->name) . self::get_ext($this->file["name"], true);
             $this->auto_extension = false;
             $this->encrypt_name = false;
         }
 
         if ($this->auto_extension) {
-            return pathinfo($this->name, PATHINFO_FILENAME) . $this->get_ext($this->file["name"], true);
+            return pathinfo($this->name, PATHINFO_FILENAME) . self::get_ext($this->file["name"], true);
         } else {
             return $this->name;
         }
+    }
+
+    /**
+     * Get the name of the temporary file
+     * @return string
+     */
+    public function get_tmp_name()
+    {
+        return isset($this->file["tmp_name"]) ? $this->file["tmp_name"] : null;
     }
 
     /**
@@ -350,17 +359,17 @@ class Uploader
             $this->error = self::ERR_EMPTY_FILE;
         } else if (strlen($this->file["name"]) == 0 || strlen($this->file["tmp_name"]) == 0 || strlen($this->file["type"]) == 0 || $this->file["size"] == 0) {
             $this->error = self::ERR_EMPTY_FILE;
-        } else if ($this->extensions !== null && !in_array($this->get_ext($this->file["name"]), $this->extensions)) {
+        } else if ($this->extensions !== null && !in_array(self::get_ext($this->file["name"]), $this->extensions)) {
             $this->error = self::ERR_INVALID_EXT;
-        } else if ($this->disallowed_extensions !== null && in_array($this->get_ext($this->file["name"]), $this->disallowed_extensions)) {
+        } else if ($this->disallowed_extensions !== null && in_array(self::get_ext($this->file["name"]), $this->disallowed_extensions)) {
             $this->error = self::ERR_INVALID_EXT;
         } else if ($this->types !== null && !in_array($this->file["type"], $this->types)) {
             $this->error = self::ERR_INVALID_TYPE;
         } else if ($this->disallowed_types !== null && in_array($this->file["type"], $this->disallowed_types)) {
             $this->error = self::ERR_INVALID_TYPE;
-        } else if ($this->max_size !== null && $this->file["size"] > $this->mb_to_byte($this->max_size)) {
+        } else if ($this->max_size !== null && $this->file["size"] > self::mb_to_byte($this->max_size)) {
             $this->error = self::ERR_LONG_SIZE;
-        } else if ($this->min_size !== null && $this->file["size"] < $this->mb_to_byte($this->min_size)) {
+        } else if ($this->min_size !== null && $this->file["size"] < self::mb_to_byte($this->min_size)) {
             $this->error = self::ERR_SMALL_SIZE;
         } else if ($this->file["error"] == 1 || $this->file["error"] == 2) {
             $this->error = self::ERR_LONG_SIZE;
@@ -552,7 +561,7 @@ class Uploader
             $ext = array_pop($split);
         }
 
-        register_shutdown_function(function() use($temp) {
+        register_shutdown_function(function() use ($temp) {
             fclose($temp);
         });
 
