@@ -73,8 +73,7 @@ More examples in the "[examples](/examples)" directory.
 | `get_error()` | Get error message if an error occurred | string |
 
 ### Notes
-* `exif` and `fileinfo` extensions must be enabled.
-* [`exif_imagetype()`](https://php.net/manual/en/function.exif-imagetype.php) and [`getimagesize()`](https://php.net/manual/en/function.getimagesize.php) must be allowed.
+`exif` and `fileinfo` extensions must be enabled.
 
 ### Contributes
 Please send pull request or open an issue if you have the feature you want.
