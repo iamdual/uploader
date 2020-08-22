@@ -14,7 +14,7 @@ if (isset($_FILES["file"])) {
     if (!$upload->check()) {
         echo "An error occurred: " . $upload->get_error();
     } else {
-        echo 'Base64 encoded data URL: <textarea>'.$upload->get_data_url().'</textarea>';
+        echo 'Base64 encoded data URL:<br /><textarea cols=80 rows=10>'.$upload->get_data_url().'</textarea>';
     }
 
 }
