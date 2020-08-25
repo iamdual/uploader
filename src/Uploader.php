@@ -345,6 +345,24 @@ class Uploader
     }
 
     /**
+     * Get the mime type of the file
+     * @return string
+     */
+    public function get_type()
+    {
+        return isset($this->file["type"]) ? $this->file["type"] : null;
+    }
+
+    /**
+     * Get the size of the file
+     * @return string
+     */
+    public function get_size()
+    {
+        return isset($this->file["size"]) ? $this->file["size"] : null;
+    }
+    
+    /**
      * Get the data URL of the temporary file
      * @return string
      */

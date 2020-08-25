@@ -17,4 +17,18 @@ final class MethodsTest extends TestCase
 
         $this->assertEquals(trim(file_get_contents(__DIR__ . "/assets/foo.base64")), $upload->get_data_url());
     }
+
+    public function testGetType()
+    {
+        $upload = new \iamdual\Uploader(["name" => "foo.png", "type" => "image/png", "tmp_name" => __DIR__ . "/assets/foo.png", "error" => 0, "size" => 1]);
+
+        $this->assertEquals("image/png", $upload->get_type());
+    }
+
+    public function testGetSize()
+    {
+        $upload = new \iamdual\Uploader(["name" => "foo.png", "type" => "image/png", "tmp_name" => __DIR__ . "/assets/foo.png", "error" => 0, "size" => 1]);
+
+        $this->assertEquals(1, (int)$upload->get_size());
+    }
 }
