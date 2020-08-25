@@ -250,7 +250,7 @@ class Uploader
      */
     public function path($path)
     {
-        $this->path = $path;
+        $this->path = rtrim($path, "/");
         return $this;
     }
 
@@ -324,12 +324,12 @@ class Uploader
 
         if ($this->encrypt_name) {
             $this->name = self::hashed($this->name) . self::get_ext($this->file["name"], true);
-            $this->auto_extension = false;
             $this->encrypt_name = false;
+            $this->auto_extension = false;
         }
 
         if ($this->auto_extension) {
-            return pathinfo($this->name, PATHINFO_FILENAME) . self::get_ext($this->file["name"], true);
+            return $this->name . self::get_ext($this->file["name"], true);
         } else {
             return $this->name;
         }
@@ -350,15 +350,7 @@ class Uploader
      */
     public function get_data_url()
     {
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
-
-        if (isset($this->file["tmp_name"])) {
-            $mime =  mime_content_type($this->file["tmp_name"]);
-            $source = file_get_contents($this->file["tmp_name"]);
-            $encoded = base64_encode($source);
-            return 'data:' . $mime . ';base64,' . $encoded;
-        }
-        return null;
+        return self::data_url($this->file["tmp_name"]);
     }
 
     /**
@@ -452,22 +444,19 @@ class Uploader
     {
         if ($this->check()) {
             if (!file_exists($this->get_path())) {
-                @mkdir($this->get_path(), 0777, true);
+                @mkdir($this->get_path(null, false), 0777, true);
             }
-            $filepath = $this->get_path($this->get_name());
+            $filepath = $this->get_path();
             if ($this->override === false && $this->encrypt_name === false && file_exists($filepath)) {
-                $fileinfo = pathinfo($filepath);
-                $filename = $fileinfo["filename"];
-                $fileextn = isset($fileinfo["extension"]) ? "." . $fileinfo["extension"] : "";
                 $number = 2;
+                $filename = pathinfo($filepath, PATHINFO_FILENAME);
                 do {
-                    $filepath = $this->get_path($filename . (($number) ? "_{$number}" : "") . $fileextn);
+                    $this->name($filename . (($number) ? "_{$number}" : ""), true);
                     $number++;
-                } while (file_exists($filepath));
-                $this->name = pathinfo($filepath, PATHINFO_BASENAME);
+                } while (file_exists($this->get_path()));
             }
             $upload_function = $copy_file ? "copy" : "move_uploaded_file";
-            $upload_function($this->file["tmp_name"], $filepath);
+            $upload_function($this->file["tmp_name"], $this->get_path());
             return true;
         } else {
             return false;
@@ -476,17 +465,21 @@ class Uploader
 
     /**
      * Get the full path
-     * @param string $filename
+     * @param string $filename (optional)
      * @return string
      */
-    public function get_path($filename = "")
+    public function get_path($filename = null, $include_filename = true)
     {
         $path = "";
         if ($this->path !== null) {
-            $path = rtrim($this->path, "/") . "/";
+            $path = $this->path . "/";
         }
-        if ($filename !== null) {
-            $filename = rtrim($filename, "/");
+        if (!$include_filename) {
+            return $path;
+        }
+
+        if ($filename === null) {
+            $filename = $this->get_name();
         }
         return $path . $filename;
     }
@@ -599,5 +592,21 @@ class Uploader
     public static function hashed($filename)
     {
         return sha1($filename . "-" . rand(10000, 99999) . "-" . time());
+    }
+
+    /**
+     * Get the data URL by the file path
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+     * @return string
+     */
+    public static function data_url($filepath)
+    {
+        if (file_exists($filepath)) {
+            $mime =  mime_content_type($filepath);
+            $source = file_get_contents($filepath);
+            $encoded = base64_encode($source);
+            return 'data:' . $mime . ';base64,' . $encoded;
+        }
+        return null;
     }
 }
