@@ -494,7 +494,7 @@ class Uploader
     {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if ($with_dot && $extension) {
-            $extension = "." . $extension;
+            return "." . $extension;
         }
         return $extension;
     }
@@ -537,7 +537,6 @@ class Uploader
         if (isset($encoded[1])) {
             $base64 = $encoded[1];
         }
-
         return self::create_temp_file(base64_decode($base64), $mime_map);
     }
 
@@ -597,6 +596,7 @@ class Uploader
     /**
      * Get the data URL by the file path
      * https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+     * @param string $filepath
      * @return string
      */
     public static function data_url($filepath)
