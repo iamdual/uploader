@@ -67,9 +67,9 @@ More examples in the "[examples](/examples)" directory.
 | `upload()` | Upload the file and return output of the check() | boolean |
 | `check()` | Check the file can be uploaded | boolean |
 | `get_name()` | Get the uploaded file name | string |
+| `get_path()` | Get the uploaded file name with full path | string |
 | `get_tmp_name()` | Get the temporary file path | string |
 | `get_data_url()` | Get the file as base64 encoded data URL | string |
-| `get_path()` | Get the path of the file | string |
 | `get_error()` | Get error message if an error occurred | string |
 
 ### Notes
