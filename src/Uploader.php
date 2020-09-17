@@ -368,7 +368,7 @@ class Uploader
      */
     public function get_data_url()
     {
-        return self::data_url($this->file["tmp_name"]);
+        return self::data_url($this->get_tmp_name());
     }
 
     /**
@@ -381,7 +381,7 @@ class Uploader
             return false;
         }
 
-        # Standard validations
+        // Standard validations
         if (!isset($this->file["name"]) || !isset($this->file["tmp_name"]) || !isset($this->file["type"]) || !isset($this->file["size"]) || !isset($this->file["error"])) {
             $this->error = self::ERR_EMPTY_FILE;
         } else if (strlen($this->file["name"]) == 0 || strlen($this->file["tmp_name"]) == 0 || strlen($this->file["type"]) == 0 || $this->file["size"] == 0) {
@@ -406,7 +406,7 @@ class Uploader
             $this->error = self::ERR_UNKNOWN_ERROR;
         }
 
-        # Image validations
+        // Image validations
         if ($this->error === null) {
             if ($this->max_image_dimensions !== null || $this->min_image_dimensions !== null) {
                 $image_dimensions = getimagesize($this->file["tmp_name"]);
@@ -435,12 +435,7 @@ class Uploader
             }
         }
 
-        # Check if there is error
-        if ($this->error === null) {
-            return true;
-        } else {
-            return false;
-        }
+        return $this->error === null;
     }
 
     /**
@@ -461,8 +456,9 @@ class Uploader
     public function upload($copy_file = false)
     {
         if ($this->check()) {
-            if (!file_exists($this->get_path())) {
-                @mkdir($this->get_path(null, false), 0777, true);
+            $upload_dir = $this->get_path(null, false);
+            if (!is_dir($upload_dir)) {
+                @mkdir($upload_dir, 0777, true);
             }
             $filepath = $this->get_path();
             if ($this->override === false && $this->encrypt_name === false && file_exists($filepath)) {
@@ -584,8 +580,7 @@ class Uploader
         if (isset($mime_map[$mime])) {
             $ext = $mime_map[$mime];
         } else {
-            $split = explode("/", $mime);
-            $ext = array_pop($split);
+            $ext = array_pop(explode("/", $mime));
         }
 
         register_shutdown_function(function() use ($temp) {
