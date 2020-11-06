@@ -42,6 +42,7 @@ final class FileNameTest extends TestCase
         $upload->encrypt_name();
 
         $this->assertNotEquals($upload->get_name(), "foo.json");
+        $this->assertEquals($upload->encrypt_name, false); // Because it's setting to 'true' once
     }
 
     public function testName6()

@@ -412,15 +412,13 @@ class Uploader
                 $image_dimensions = getimagesize($this->file["tmp_name"]);
                 if (!$image_dimensions) {
                     $this->error = self::ERR_NOT_AN_IMAGE;
-                }
-                if ($this->error === null && $this->max_image_dimensions !== null) {
+                } else if ($this->max_image_dimensions !== null) {
                     for ($i = 0; $i <= 1; $i++) {
                         if (isset($this->max_image_dimensions[$i]) && is_numeric($this->max_image_dimensions[$i]) && $image_dimensions[$i] > $this->max_image_dimensions[$i]) {
                             $this->error = self::ERR_MAX_DIMENSION;
                         }
                     }
-                }
-                if ($this->error === null && $this->min_image_dimensions !== null) {
+                } else if ($this->min_image_dimensions !== null) {
                     for ($i = 0; $i <= 1; $i++) {
                         if (isset($this->min_image_dimensions[$i]) && is_numeric($this->min_image_dimensions[$i]) && $image_dimensions[$i] < $this->min_image_dimensions[$i]) {
                             $this->error = self::ERR_MIN_DIMENSION;
@@ -461,7 +459,7 @@ class Uploader
                 @mkdir($upload_dir, 0777, true);
             }
             $filepath = $this->get_path();
-            if ($this->override === false && $this->encrypt_name === false && file_exists($filepath)) {
+            if ($this->override === false && file_exists($filepath)) {
                 $number = 2;
                 $filename = pathinfo($filepath, PATHINFO_FILENAME);
                 do {
@@ -580,7 +578,8 @@ class Uploader
         if (isset($mime_map[$mime])) {
             $ext = $mime_map[$mime];
         } else {
-            $ext = array_pop(explode("/", $mime));
+            $arr = explode("/", $mime);
+            $ext = end($arr);
         }
 
         register_shutdown_function(function() use ($temp) {
