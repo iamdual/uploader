@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2018, Ekin Karadeniz <imduual@gmail.com>
+ * Copyright 2018, Ekin Karadeniz <iamdual@protonmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
