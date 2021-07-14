@@ -60,7 +60,7 @@ More examples in the "[examples](/examples)" directory.
 | `must_be_image()` | Check the file is image |
 | `max_dimensions(int $width, int $height)` | Maximum image dimensions |
 | `min_dimensions(int $width, int $height)` | Minimum image dimensions |
-| `aspect_ratios(array(mixed $aspect_ratios))` | Image aspect ratios has to be |
+| `aspect_ratios(array $aspect_ratios)` | Image aspect ratios has to be (example: 1:1: 4:3, 16:9) |
 | `error_messages(array $errors)` | Custom error messages |
 
 | Name | Description | Return |
