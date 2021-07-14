@@ -4,13 +4,6 @@ use PHPUnit\Framework\TestCase;
 
 final class UploadTest extends TestCase
 {
-    public function setUp()
-    {
-        if (!is_writable(__DIR__ . "/assets")) {
-            throw new Exception(__DIR__ . "/assets is not writable.");
-        }
-    }
-
     public function testUploadFiles()
     {
         $uploaded_files = [];
@@ -21,10 +14,10 @@ final class UploadTest extends TestCase
             $upload->path(__DIR__ . "/files");
             $upload->name("bar");
 
-            $this->assertEquals($upload->upload(true), true);
-            $this->assertEquals($upload->check(), true);
+            $this->assertEquals(true, $upload->upload(true));
+            $this->assertEquals(true, $upload->check());
             $suffix = $i > 1 ? "_{$i}" : "";
-            $this->assertEquals($upload->get_name(), "bar{$suffix}.jpg");
+            $this->assertEquals("bar{$suffix}.jpg", $upload->get_name());
             $uploaded_files[] = $upload->get_path();
         }
 
@@ -42,10 +35,10 @@ final class UploadTest extends TestCase
             $upload->must_be_image();
             $upload->path(__DIR__ . "/files");
 
-            $this->assertEquals($upload->upload(true), true);
-            $this->assertEquals($upload->check(), true);
+            $this->assertEquals(true, $upload->upload(true));
+            $this->assertEquals(true, $upload->check());
             $suffix = $i > 1 ? "_{$i}" : "";
-            $this->assertEquals($upload->get_name(), "xyz{$suffix}.jpg");
+            $this->assertEquals("xyz{$suffix}.jpg", $upload->get_name());
             $uploaded_files[] = $upload->get_path();
         }
 
@@ -60,12 +53,12 @@ final class UploadTest extends TestCase
         $upload = new \iamdual\Uploader(\iamdual\Uploader::from_base64($base64_data));
         $upload->allowed_extensions(array("jpg", "jpeg"));
         $upload->allowed_types(array("image/jpeg"));
-        $upload->max_image_dimensions(210, 60);
-        $upload->min_image_dimensions(210, 60);
+        $upload->max_dimensions(210, 60);
+        $upload->min_dimensions(210, 60);
         $upload->name("hello.jpg", false);
-        $this->assertEquals($upload->upload(true), true);
-        $this->assertEquals($upload->check(), true);
-        $this->assertEquals($upload->get_name(), "hello.jpg");
+        $this->assertEquals(true, $upload->upload(true));
+        $this->assertEquals(true, $upload->check());
+        $this->assertEquals("hello.jpg", $upload->get_name());
         @unlink($upload->get_path("hello.jpg"));
     }
 }

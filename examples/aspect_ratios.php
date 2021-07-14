@@ -6,11 +6,10 @@ use \iamdual\Uploader;
 if (isset($_FILES["file"])) {
 
     $upload = new Uploader($_FILES["file"]);
-    $upload->extensions = array("png", "jpg", "jpeg", "gif");
-    $upload->name       = "foo";
-    $upload->max_size   = $upload->mb_to_byte(5);
-    $upload->override   = false;
-    $upload->path       = "upload/files";
+    $upload->must_be_image();
+    $upload->aspect_ratios(array("16:9", "1:1"));
+    $upload->max_size(5); // in MB
+    $upload->path("upload/files");
 
     if (!$upload->upload()) {
         echo "Upload error: " . $upload->get_error();
@@ -22,5 +21,5 @@ if (isset($_FILES["file"])) {
 ?>
 
 <form enctype="multipart/form-data" action="" method="post">
-    Select File: <input type="file" name="file"> <input type="submit" value="Upload">
+    Select a file with aspect ratio 16:9 or 1:1 <input type="file" name="file"> <input type="submit" value="Upload">
 </form>

@@ -28,6 +28,7 @@ class Uploader
     const ERR_NOT_AN_IMAGE = 7;
     const ERR_MAX_DIMENSION = 8;
     const ERR_MIN_DIMENSION = 9;
+    const ERR_ASPECT_RATIO = 10;
 
     /**
      * Error ID
@@ -53,8 +54,9 @@ class Uploader
         self::ERR_SMALL_SIZE => "File size is too small.",
         self::ERR_UNKNOWN_ERROR => "Unknown error occurred.",
         self::ERR_NOT_AN_IMAGE => "The selected file must be an image.",
-        self::ERR_MAX_DIMENSION => "The dimensions of the file is too large.",
-        self::ERR_MIN_DIMENSION => "The dimensions of the file is too small."
+        self::ERR_MAX_DIMENSION => "The dimensions of the image is too large.",
+        self::ERR_MIN_DIMENSION => "The dimensions of the image is too small.",
+        self::ERR_ASPECT_RATIO => "The aspect ratio of the image is not as specified.",
     );
 
     /**
@@ -109,6 +111,11 @@ class Uploader
     public $auto_extension = true;
 
     /**
+     * @var boolean
+     */
+    public $must_be_image = false;
+
+    /**
      * @var array
      */
     public $max_image_dimensions = null;
@@ -119,14 +126,14 @@ class Uploader
     public $min_image_dimensions = null;
 
     /**
-     * @var boolean
+     * @var array
      */
-    public $encrypt_name = false;
+    public $image_aspect_ratios = null;
 
     /**
      * @var boolean
      */
-    public $must_be_image = false;
+    public $encrypt_name = false;
 
     /**
      * @var boolean
@@ -215,7 +222,7 @@ class Uploader
      * @param int $height
      * @return $this
      */
-    public function max_image_dimensions($width, $height)
+    public function max_dimensions($width, $height)
     {
         $this->max_image_dimensions = array($width, $height);
         return $this;
@@ -227,9 +234,38 @@ class Uploader
      * @param int $height
      * @return $this
      */
-    public function min_image_dimensions($width, $height)
+    public function min_dimensions($width, $height)
     {
         $this->min_image_dimensions = array($width, $height);
+        return $this;
+    }
+
+    /**
+     * @deprecated
+     * DEPRECATED: Use max_dimensions()
+     */
+    public function max_image_dimensions($width, $height)
+    {
+        return $this->max_dimensions($width, $height);
+    }
+
+    /**
+     * @deprecated
+     * DEPRECATED: Use min_dimensions()
+     */
+    public function min_image_dimensions($width, $height)
+    {
+        return $this->min_dimensions($width, $height);
+    }
+
+    /**
+     * Image aspect ratios has to be
+     * @param array $aspect_ratios
+     * @return $this
+     */
+    public function aspect_ratios($aspect_ratios)
+    {
+        $this->image_aspect_ratios = $aspect_ratios;
         return $this;
     }
 
@@ -361,7 +397,7 @@ class Uploader
     {
         return isset($this->file["size"]) ? $this->file["size"] : null;
     }
-    
+
     /**
      * Get the data URL of the temporary file
      * @return string
@@ -406,30 +442,51 @@ class Uploader
             $this->error = self::ERR_UNKNOWN_ERROR;
         }
 
+        if ($this->error !== null) {
+            return false;
+        }
+
         // Image validations
-        if ($this->error === null) {
-            if ($this->max_image_dimensions !== null || $this->min_image_dimensions !== null) {
-                $image_dimensions = getimagesize($this->file["tmp_name"]);
-                if (!$image_dimensions) {
-                    $this->error = self::ERR_NOT_AN_IMAGE;
-                } else if ($this->max_image_dimensions !== null) {
-                    for ($i = 0; $i <= 1; $i++) {
-                        if (isset($this->max_image_dimensions[$i]) && is_numeric($this->max_image_dimensions[$i]) && $image_dimensions[$i] > $this->max_image_dimensions[$i]) {
-                            $this->error = self::ERR_MAX_DIMENSION;
-                        }
-                    }
-                } else if ($this->min_image_dimensions !== null) {
-                    for ($i = 0; $i <= 1; $i++) {
-                        if (isset($this->min_image_dimensions[$i]) && is_numeric($this->min_image_dimensions[$i]) && $image_dimensions[$i] < $this->min_image_dimensions[$i]) {
-                            $this->error = self::ERR_MIN_DIMENSION;
-                        }
+        if ($this->max_image_dimensions !== null || $this->min_image_dimensions !== null || $this->image_aspect_ratios) {
+            $image_dimensions = getimagesize($this->file["tmp_name"]);
+            if (!$image_dimensions) {
+                $this->error = self::ERR_NOT_AN_IMAGE;
+                return false;
+            }
+            if ($this->max_image_dimensions !== null) {
+                for ($i = 0; $i <= 1; $i++) {
+                    if (isset($this->max_image_dimensions[$i]) && is_numeric($this->max_image_dimensions[$i]) && $image_dimensions[$i] > $this->max_image_dimensions[$i]) {
+                        $this->error = self::ERR_MAX_DIMENSION;
+                        return false;
                     }
                 }
-            } else if ($this->must_be_image) {
-                // If the file must be an image and getimagesize() didn't check the file, we need to use exif_imagetype instead of getimagesize for the performance.
-                if (!exif_imagetype($this->file["tmp_name"])) {
-                    $this->error = self::ERR_NOT_AN_IMAGE;
+            }
+            if ($this->min_image_dimensions !== null) {
+                for ($i = 0; $i <= 1; $i++) {
+                    if (isset($this->min_image_dimensions[$i]) && is_numeric($this->min_image_dimensions[$i]) && $image_dimensions[$i] < $this->min_image_dimensions[$i]) {
+                        $this->error = self::ERR_MIN_DIMENSION;
+                        return false;
+                    }
                 }
+            }
+            if ($this->image_aspect_ratios !== null) {
+                foreach ($this->image_aspect_ratios as $aspect_ratio) {
+                    if (self::validate_aspect_ratio($aspect_ratio, $image_dimensions[0], $image_dimensions[1])) {
+                        if ($this->error === self::ERR_ASPECT_RATIO) {
+                            $this->error = null;
+                        }
+                        break; // Validation completed.
+                    } else {
+                        $this->error = self::ERR_ASPECT_RATIO;
+                        return false;
+                    }
+                }
+            }
+        } else if ($this->must_be_image) {
+            // If the file must be an image and getimagesize() didn't check the file, we need to use exif_imagetype instead of getimagesize for the performance.
+            if (!exif_imagetype($this->file["tmp_name"])) {
+                $this->error = self::ERR_NOT_AN_IMAGE;
+                return false;
             }
         }
 
@@ -478,6 +535,7 @@ class Uploader
     /**
      * Get the full path
      * @param string $filename (optional)
+     * @param bool $include_filename (optional)
      * @return string
      */
     public function get_path($filename = null, $include_filename = true)
@@ -509,6 +567,30 @@ class Uploader
             return "." . $extension;
         }
         return $extension;
+    }
+
+    /**
+     * Validate aspect ratio
+     * @param mixed $aspect_ratio
+     * @param int $width
+     * @param int $height
+     * @return bool
+     */
+    public static function validate_aspect_ratio($aspect_ratio, $width, $height)
+    {
+        if (!is_numeric($aspect_ratio)) {
+            if (is_string($aspect_ratio)) {
+                $aspect_ratio_pieces = explode(":", $aspect_ratio);
+            } else if (is_array($aspect_ratio)) {
+                $aspect_ratio_pieces = $aspect_ratio;
+            }
+            if (empty($aspect_ratio_pieces[0]) || empty($aspect_ratio_pieces[1])) {
+                return false;
+            }
+            $aspect_ratio = (int)$aspect_ratio_pieces[0] / (int)$aspect_ratio_pieces[1];
+        }
+
+        return ($width / $height) === $aspect_ratio;
     }
 
     /**
@@ -554,8 +636,8 @@ class Uploader
 
     /**
      * Create file array from raw input
-     * @return array
      * @param array $mime_map (optional)
+     * @return array
      */
     public static function from_raw_input($mime_map = [])
     {
@@ -582,7 +664,7 @@ class Uploader
             $ext = end($arr);
         }
 
-        register_shutdown_function(function() use ($temp) {
+        register_shutdown_function(function () use ($temp) {
             fclose($temp);
         });
 
@@ -614,7 +696,7 @@ class Uploader
     public static function data_url($filepath)
     {
         if (file_exists($filepath)) {
-            $mime =  mime_content_type($filepath);
+            $mime = mime_content_type($filepath);
             $source = file_get_contents($filepath);
             $encoded = base64_encode($source);
             return 'data:' . $mime . ';base64,' . $encoded;

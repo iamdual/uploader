@@ -31,4 +31,19 @@ final class MethodsTest extends TestCase
 
         $this->assertEquals(1, (int)$upload->get_size());
     }
+
+    public function testValidateAspectRatio()
+    {
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio("3:2", 300, 200));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio(3/2, 300, 200));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio(1.5, 300, 200));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio("1:1", 300, 300));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio(1, 300, 300));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio("16:9", 1920, 1080));
+        $this->assertTrue(\iamdual\Uploader::validate_aspect_ratio(16/9, 1920, 1080));
+        $this->assertFalse(\iamdual\Uploader::validate_aspect_ratio("1:1", 300, 300.1));
+        $this->assertFalse(\iamdual\Uploader::validate_aspect_ratio(1, 300, 300.1));
+        $this->assertFalse(\iamdual\Uploader::validate_aspect_ratio("1:1", 300, 399));
+        $this->assertFalse(\iamdual\Uploader::validate_aspect_ratio(1, 300, 399));
+    }
 }

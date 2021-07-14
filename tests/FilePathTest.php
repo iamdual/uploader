@@ -10,9 +10,9 @@ final class FilePathTest extends TestCase
         $upload->path("xyz/abc");
         $upload->name("hello");
 
-        $this->assertEquals($upload->get_name(), "hello.png");
-        $this->assertEquals($upload->get_path(null, false), "xyz/abc/");
-        $this->assertEquals($upload->get_path("456.png"), "xyz/abc/456.png");
+        $this->assertEquals("hello.png", $upload->get_name());
+        $this->assertEquals("xyz/abc/", $upload->get_path(null, false));
+        $this->assertEquals("xyz/abc/456.png", $upload->get_path("456.png"));
     }
 
     public function testPath2()
@@ -21,8 +21,8 @@ final class FilePathTest extends TestCase
         $upload->path("animals/cats");
         $upload->name("2020/08/Tekir");
 
-        $this->assertEquals($upload->get_name(), "2020/08/Tekir.jpg");
-        $this->assertEquals($upload->get_path(null, false), "animals/cats/");
-        $this->assertEquals($upload->get_path("456.jpeg"), "animals/cats/456.jpeg");
+        $this->assertEquals("2020/08/Tekir.jpg", $upload->get_name());
+        $this->assertEquals("animals/cats/", $upload->get_path(null, false));
+        $this->assertEquals("animals/cats/456.jpeg", $upload->get_path("456.jpeg"));
     }
 }

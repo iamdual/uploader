@@ -58,8 +58,9 @@ More examples in the "[examples](/examples)" directory.
 | `name(string $name)` | Rename the uploaded file (example: foo) |
 | `encrypt_name()` | Encrypt file name to hide the original name |
 | `must_be_image()` | Check the file is image |
-| `image_max_dimensions(int $width, int $height)` | Maximum image dimensions |
-| `image_min_dimensions(int $width, int $height)` | Minimum image dimensions |
+| `max_dimensions(int $width, int $height)` | Maximum image dimensions |
+| `min_dimensions(int $width, int $height)` | Minimum image dimensions |
+| `aspect_ratios(array(mixed $aspect_ratios))` | Image aspect ratios has to be |
 | `error_messages(array $errors)` | Custom error messages |
 
 | Name | Description | Return |
