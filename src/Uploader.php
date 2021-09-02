@@ -478,7 +478,6 @@ class Uploader
                         break; // Validation completed.
                     } else {
                         $this->error = self::ERR_ASPECT_RATIO;
-                        return false;
                     }
                 }
             }
