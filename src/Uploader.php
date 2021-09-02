@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2018, Ekin Karadeniz <iamdual@protonmail.com>
+ * Copyright 2021, Ekin Karadeniz <iamdual@protonmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,7 +344,7 @@ class Uploader
         if ($this->custom_error_messages !== null && isset($this->custom_error_messages[$error_id])) {
             return $this->custom_error_messages[$error_id];
         }
-        return $error_id ? $this->error_messages[$error_id] : null;
+        return isset($this->error_messages[$error_id]) ? $this->error_messages[$error_id] : null;
     }
 
     /**

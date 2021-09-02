@@ -4,7 +4,7 @@ jobs:
   tests:
     strategy:
       matrix:
-        php-versions: ['5.6', '7.0', '7.4', '8.0']
+        php-versions: ['7.2', '7.4', '8.0']
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,8 +21,6 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          # Use composer.json for key, if composer.lock is not committed.
-          # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
       - name: Install dependencies
