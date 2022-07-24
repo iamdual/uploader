@@ -7,9 +7,7 @@ if (isset($_FILES["file"])) {
 
     $upload = new Uploader($_FILES["file"]);
     $upload->allowed_extensions(array("png", "jpg", "jpeg", "gif"));
-    $upload->allowed_types(array("image/png", "image/jpeg"));
     $upload->max_size(5); // in MB
-    $upload->min_size(0); // in MB
 
     if (!$upload->check()) {
         echo "An error occurred: " . $upload->get_error();
