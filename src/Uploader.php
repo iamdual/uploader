@@ -391,7 +391,7 @@ class Uploader
 
     /**
      * Get the size of the file
-     * @return string
+     * @return int
      */
     public function get_size()
     {
@@ -599,7 +599,7 @@ class Uploader
      */
     public static function mb_to_byte($filesize)
     {
-        return $filesize * pow(1024, 2);
+        return $filesize * 1048576; // equivalent of "pow(1024, 2)"
     }
 
     /**
